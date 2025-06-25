@@ -4,9 +4,9 @@
 Hello learner fellows !! i know that i have not write the daily report for the past 4 days but From, Today onwards i am starting to write. Today, ***Date: [2082-03-11]*** ***day: wednesday***
 
 ### Today's Goals
-- [ ] complete writing function from FEN style to Board notation
-- [ ] write an function to encode Board to numerical
-- [ ] Moves of each chess piece 
+- [x] complete writing function from FEN style to Board notation
+- [x] write an function to encode Board to numerical
+- [x] Moves of each chess piece 
 
 ### Completed Tasks
 1. Created a function that actually can help to write Board from FEN style
@@ -43,16 +43,16 @@ Hello learner fellows !! i know that i have not write the daily report for the p
 - It was much easier , it just like that encoding from dictionary and pairing with keys and values
 
 ### Tomorrow's Plan
-1. detecting checkmate
-2. i also need to handle rules like (Castaling, En passant, Legal move generation considering game state, PGN/FEN parsing and saving games) 
-3. Board Visualization and move legality checking 
+1. [x] detecting checkmate
+2. [x] i also need to handle rules like (Castaling, En passant, Legal move generation considering game state, PGN/FEN parsing and saving games) 
+3. [x] Board Visualization and move legality checking 
 
 ## Progress Tracking:
 1. I will be using GitHub Projects for task management and Notion for tracking
 
 ## Milestone Checklist:
-- [ ] Development environment setup
-- [ ] Basic board representation
+- [x] Development environment setup
+- [x] Basic board representation
 - [ ] Move generation system
 - [ ] Special moves implementation
 - [ ] Game state management
