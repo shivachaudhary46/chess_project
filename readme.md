@@ -43,9 +43,9 @@ Hello learner fellows !! i know that i have not write the daily report for the p
 - It was much easier , it just like that encoding from dictionary and pairing with keys and values
 
 ### Tomorrow's Plan
-1. [x] detecting checkmate
-2. [x] i also need to handle rules like (Castaling, En passant, Legal move generation considering game state, PGN/FEN parsing and saving games) 
-3. [x] Board Visualization and move legality checking 
+1. [ ] detecting checkmate
+2. [ ] i also need to handle rules like (Castaling, En passant, Legal move generation considering game state, PGN/FEN parsing and saving games) 
+3. [ ] Board Visualization and move legality checking 
 
 ## Progress Tracking:
 1. I will be using GitHub Projects for task management and Notion for tracking
