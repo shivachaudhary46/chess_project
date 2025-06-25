@@ -1,152 +1,168 @@
-import numpy as np
+import numpy as np 
 
-encoded = {"R": 2, "N": 3, "B": 4, "Q": 5, "K": 6, "P": 1, "r": -2, "n": -3, "b": -4, "q": -5, "k":-6, "p": -1, ".": 0}
+board = [["r", "n", "b", "q", "k", "b", "n", "r"],
+                   ["p", "p", "p", "p", "p", "p", "p", "p"],
+                   [".", ".", ".", ".", ".", ".", ".", "."],
+                   [".", ".", ".", ".", ".", ".", ".", "."],
+                   [".", ".", ".", ".", ".", ".", ".", "."],
+                   [".", ".", ".", ".", ".", ".", ".", "."],
+                   ["P", "P", "P", "P", "P", "P", "P", "P"],
+                   ["R", "N", "B", "Q", "K", "B", "N", "R"]]
 
-board= [["r", "n", "b", "k", "q", "b", "n", "r"],
-        ["p", "p", "p", "p", "p", "p", "p", "p"],
-        [".", ".", ".", ".", ".", ".", ".", "."],
-        [".", ".", ".", ".", ".", ".", ".", "."],
-        [".", ".", ".", ".", ".", ".", ".", "."],
-        [".", ".", ".", ".", ".", ".", ".", "."],
-        ["P", "P", "P", "P", "P", "P", "P", "P"],
-        ["R", "N", "B", "K", "Q", "B", "N", "R"]]
+encoded = {"R": 2 , "N": 3, "B": 4, "Q": 5, "K": 6, "P": 1, "r": -2, "n": -3, "b": -4, "q": -5, "k": -6, "p": -1, ".": 0}
 
-# numerical_board = np.array([[encoded[cell] for cell in row ]for row in board])
-# print(numerical_board)
-
-numerical_board1 = []
+## store the numerical reprsentation
+numerical_representation = []
 for row in board:
-    each = []
-    for i in row:
+    each=[]
+    for i in row: 
         each.append(encoded[i])
-    numerical_board1.append(each)
-    
-numerical_board1=np.array(numerical_board1)
-print(numerical_board1)
+    numerical_representation.append(each)
 
-def knight_valid_moves(start_xy):
-    directions = np.array([[-2, -1], [-2, 1], [2, -1], [1, 2]])
-    all_move = []
+num_board =np.array(numerical_representation)
+# print(np.array(numerical_representation))
+        
+directions = {
+                "R": [[1, 0], [-1, 0], [0, 1], [0, -1]],
+                "N": [[-2, -1], [-2, 1], [2, -1], [1, 2], [-1, 2], [2, 1], [-1, -2], [1, -2]], 
+                "B": [[1, 1], [1, -1], [-1, 1], [-1, -1]], 
+                "Q": [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, -1], [-1, 1]], 
+                "K": [[+1, 0], [-1, 0], [0, +1], [0, -1], [+1, +1], [-1, -1], [+1, -1], [-1, +1]]
+            }
+# print(num_board)
 
-    for direction in directions:
-        move = start_xy + direction
-        if 0 <= move[0] <= 7 and 0 <= move[1] <= 7 :
-            all_move.append(move)
-        else: 
-            break
-    
-    all_move = np.array(all_move)
-    return all_move
+## class piece for showing position and piece
+class chess_piece:
+    def __init__(self, piece, position):
+        self.piece = piece ## this is the piece 
+        self.position = position ## tuples
 
-# knight_valid_moves((7, 6))
-
-def queen_valid_moves(start_xy):
-    directions = np.array([[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, -1], [-1, 1]])
-    all_move = []
-
-    for direction in directions:
-        for step in range(1, 8):
-            move = start_xy + step * direction
-            # print(move)
-            if 0 <= move[0] <= 7 and 0 <= move[1] <= 7:
-                all_move.append(move)
-            else: 
-                break
-     
-    all_move = np.array(all_move)
-    return all_move
-# queen_move((2, 3))
-
-def bishop_valid_moves(start_xy):
-    directions = np.array([[1, 1], [1, -1], [-1, 1], [-1, -1]])
-    all_move=[]
-    for direction in directions:
-        for step in range(1, 8):
-            move=start_xy+step*direction
-            if 0<=move[0]<=7 and 0<=move[1]<=7:
-                all_move.append(move)
+    def is_white(self, piece, board):
+        x, y = self.position
+        if board[x][y] == piece:
+            ## position matches with piece
+            if piece > 0:
+                return True
             else:
-                break
-    all_move=np.array(all_move)
-    return all_move
-
-# bishop_move((1, 2))
-
-def rook_valid_moves(start_xy):
-    directions = np.array([[1, 0], [-1, 0], [0, 1], [0, -1]])
-    all_move=[]
-    for direction in directions:
-        for step in range(1, 8):
-            move=start_xy+step*direction
-            if 0<=move[0]<=7 and 0<=move[1]<=7:
-                all_move.append(move)
+                return False
+            
+## chess piece knowing 
+piece = chess_piece("Q", (7, 3))
+# print(piece.piece)
+# print(piece.position)
+# print(piece.is_white(5, num_board))
+## converting the fen style to board
+def fen_string_board(fen_string):
+    rows = fen_string.split(" ")[0].split("/")
+    board = []
+    for row in rows:
+        row_board = []
+        for char in row:
+            if char.isdigit():
+                row_board.extend("." * int(char))
             else:
-                break
-    all_move=np.array(all_move)
-    return all_move
+                row_board.append(char)
+        board.append(row_board)
+    return board
 
-def king_valid_moves(start_xy):
-    directions=np.array([[+1, 0], [-1, 0], [0, +1], [0, -1], [+1, +1], [-1, -1], [+1, -1], [-1, +1]])
-    all_move=[]
-    for direction in directions:
-            move=start_xy+direction
-            if 0<=move[0]<=7 and 0<=move[1]<7:
-                all_move.append(move)
-            else:
-                break
-    all_move=np.array(all_move)
-    return all_move
+fen = "r1bq1rk1/ppp1bppp/2n2n2/3pp3/3PP3/2P1BN2/PP1N1PPP/R2QKB1R w KQ - 0 8"
 
-def white_valid_pawn(board, start_xy):
-    all_move = []
-    row, col = start_xy
-    # if one moves ahead 
-    if row > 0 and board[row-1][col]==0:
-        all_move.append(np.array([row-1, col]))
-        # board[row-1][col]=board[row][col]
+fen_board = fen_string_board(fen)
 
-    ## if piece want to move two position at one time 
-    if row == 6 and board[row-2][col]==0:
-        all_move.append(np.array([row-2, col]))
-        # board[row-2][col]=board[row][col]
-    
-    ## moving in diagnoal direction 
-    for diag in [-1, +1]:
-        new_row, new_col = row-1, diag+col
-        if 0<=new_row<=7 and 0<=new_col<=7:
-            if board[new_row][new_col] < 0:
-                all_move.append(np.array([new_row, new_col]))
+for row in fen_board:
+    print(" ".join(row))
 
-    all_move=np.array(all_move)
-    return all_move
+def to_numericalboard(board, encoding):
+    return np.array([[encoding.get(cell, 0) for cell in row] for row in board])
 
-def black_valid_pawn(board, start_xy):
+board = to_numericalboard(fen_board, encoded)
+print(board)
+
+def all_valid_moves(piece, start_pos, board):
+    x, y = start_pos
+    name = piece.upper()
+    piece_code = encoded[piece]
+    iswhite = piece_code < 0
     moves = []
-    row, col = start_xy
-    ## moving one square each 
-    if row < 7 and board[row+1][col] == 0:
-        moves.append(np.array([row+1, col])) 
-
-    if row == 1 and board[row+2][col] == 0:
-        moves.append(np.array([row+2, col]))
     
-    for diag in [-1, 1]:
-        new_row, new_col = row+1, col+diag
-        if 0 <= new_row <= 7 and 0 <= new_col <= 7:
-            if board[new_row][new_col] > 0:
-                moves.append(np.array([new_row, new_col]))
+    if name in ["R", "B", "Q"]:
+        for direction in directions[name]:
+            for step in range(1, 8):
+                nx, ny = x+step*direction[0], y+step*direction[1]
+                
+                ## the moving piece destination should be limit inside the 
+                ## 8 * 8 array
+                if 0<=nx<=7 and 0<=ny<=7:
+                    target = board[nx][ny]
 
-    return np.array(moves)
+                    # if destination is empty 
+                    if target == 0:
+                        moves.append(np.array([nx, ny]))
 
-queen_list = queen_valid_moves((7, 4))
-# print(queen_list)
+                    # capturing piece
+                    elif ((target < 0 and not iswhite) or (target > 0 and iswhite)):
+                        moves.append(np.array([nx, ny]))
+                        break
+                    
+                    ## target is same as one 
+                    else:
+                        break
+                else:
+                    break
+        return np.array(moves)
 
-numerical_board1[2][3] = 1
-numerical_board1[2][5] = 4
-print(numerical_board1)
-white_pawn_list = white_valid_pawn(numerical_board1, (6, 4))
-print(white_pawn_list)
+    elif name in ["N", "K"]:
+        for dx, dy in directions[name]:
+            nx, ny= x+dx , y+dy
+            if 0<=nx<=7 and 0<=ny<=7:
+                target = board[nx][ny]
+                if target == 0 or ((target < 0 and not iswhite) or (target > 0 and iswhite)):
+                    moves.append((nx, ny))
+        return np.array(moves)
 
-black_pawn_list = black_valid_pawn(numerical_board1, (1, 4))
-print(black_pawn_list)
+    elif name == "P":
+        if iswhite: ## black
+            ## move one direction each 
+            if x < 7 and board[x+1][y] == 0 :
+                moves.append((x+1, y))
+            
+            ## move two squares if row position is 1
+            if x == 1 and board[x+2][y]:
+                moves.append((x+2, y))
+
+            ## capture piece diagnoally
+            for diag in [-1, 1]:
+                nx, ny = x + 1, y + diag
+                if 0<=nx<=7 and 0<=ny<=7: 
+                    target = board[nx][ny]
+                    if target > 0 :
+                        moves.append((nx, ny))
+            
+            return moves
+
+        else:
+            # for white pawn 
+            if x > 0 and board[x-1][y] == 0 :
+                moves.append((x-1, y))
+            
+            ## move two squares if row position is 1
+            if x == 6 and board[x-2][y]:
+                moves.append((x-2, y))
+
+            ## capture piece diagnoally
+            for diag in [-1, 1]:
+                nx, ny = x + 1, y + diag
+                if 0<=nx<=7 and 0<=ny<=7: 
+                    target = board[nx][ny]
+                    if target < 0 :
+                        moves.append((nx, ny))
+
+            return moves
+
+
+# num_board[3][5] = 6
+# print(num_board)
+# valid_move = all_valid_moves("P", (6, 0), num_board)
+# print(valid_move)
+    
 
