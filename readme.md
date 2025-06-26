@@ -61,3 +61,50 @@ Hello learner fellows !! i know that i have not write the daily report for the p
 - [ ] Test suite
 - [ ] Performance optimization
 - [ ] Phase 1 completion
+
+# Daily Progress Report
+
+## DAY 6
+Hello learner fellows! Back again for another update. ***Date: [2082-03-12]*** ***day: Thursday***
+
+### Today's Goals
+- [x] Start implementing checkmate detection
+- [x] Begin handling special chess rules: Castling and En passant
+- [x] Visualize the board and verify move legality
+
+### Completed Tasks
+1. Wrote the initial logic to detect checkmate positions on the board.
+2. Started implementing the rules for Castling (kingside and queenside) and En passant.
+3. Developed a simple board visualization using text output for easier move validation.
+4. Refactored old code for better readability and added more comments for future reference.
+
+### Code Snippets
+```python
+# Pseudocode for checkmate detection (simplified)
+def is_checkmate(board, color):
+    if is_in_check(board, color) and not has_any_legal_moves(board, color):
+        return True
+    return False
+
+# Example board visualization
+def display_board(board):
+    for row in board:
+        print(" ".join(row))
+
+# Example usage
+display_board(fen_board)
+```
+
+### Challenges Faced
+- Understanding all the edge cases for checkmate situations and special moves (Castling, En passant).
+- Making sure the move generation logic accounts for current game state and rules.
+
+### Solutions Found
+- Broke the problem into smaller functions—handling check, legal move generation, and special rules separately.
+- Used test FEN positions and manual sketches to visualize tricky scenarios.
+
+### Tomorrow's Plan
+1. [ ] Finalize and test checkmate detection thoroughly.
+2. [ ] Complete logic for Castling and En passant.
+3. [ ] Work on PGN/FEN parsing and saving game progress.
+4. [ ] Enhance board visualization for better UX.
