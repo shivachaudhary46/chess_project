@@ -104,7 +104,46 @@ display_board(fen_board)
 - Used test FEN positions and manual sketches to visualize tricky scenarios.
 
 ### Tomorrow's Plan
-1. [ ] Finalize and test checkmate detection thoroughly.
-2. [ ] Complete logic for Castling and En passant.
-3. [ ] Work on PGN/FEN parsing and saving game progress.
-4. [ ] Enhance board visualization for better UX.
+1. [x] Finalize and test checkmate detection thoroughly.
+2. [x] Complete logic for Castling and En passant.
+3. [x] Work on PGN/FEN parsing and saving game progress.
+4. [x] Enhance board visualization for better UX.
+
+# Daily Progress Report
+
+## DAY 7
+Hello learner fellows! Back again for another update. ***Date: [2082-03-13]*** ***day: Friday***
+
+### Today's Goals
+- [x] Start implementing checkmate detection
+- [x] Begin coding for parsing pgn (c2c4) to numerical board
+- [x] Created a function which would take input for pgn parsing
+
+### Completed Tasks
+1. Wrote the initial logic to find the king position
+2. Started creating the is_check() function which will check if king is attacked or not
+3. Developed a simple board visualization using text output 
+4. Created a function which will take pgn input in runtime
+
+### Code Snippets
+```python
+    def square_to_index(square):
+        files = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7}
+        ranks = {'8': 0, '7': 1, '6': 2, '5': 3, '4': 4, '3': 5, '2': 6, '1': 7}
+
+        file = square[0]
+        rank = square[1]
+
+        return ranks[rank], files[file]
+```
+
+### Challenges Faced
+- Understanding how we can simulate the checkmate condition and how can king escape if there is possibilties
+- faced problem in legal_move_generation function 
+
+### Solutions Found
+- Broke the problem into smaller functions—handling and debugged each thing, legal move generation,
+- still not able to find solution to stimulate the checkmate condition 
+
+
+
