@@ -67,11 +67,12 @@ def fen_string_board(fen_string):
 
 fen = "r1bq1rk1/ppp1bppp/2n2n2/3pp3/3PP3/2P1BN2/PP1N1PPP/R2QKB1R w KQ - 0 8"
 
+# turn = fen.split(" ")[1]
+# print(turn)
 def get_turn(fen):
-    turn = fen.split('')[1]
+    turn = fen.split(" ")[1]
     print(turn)
 
-    
 get_turn(fen)
 
 fen_board = fen_string_board(fen)

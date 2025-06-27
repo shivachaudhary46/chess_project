@@ -27,7 +27,7 @@ def fen_string_board(fen_string):
 
 def get_turn(fen):
     """returning whose turn is next"""
-    turn = fen.split(' ')[1]
+    turn = fen.split(" ")[1]
     return turn
 
 def to_view_fen_converted(board):
@@ -179,7 +179,7 @@ def all_valid_moves(piece, start_pos, board):
                     if target > 0 :
                         moves.append((nx, ny))
             
-            return moves
+            return np.array(moves)
 
         else:
             # for white pawn 
@@ -198,7 +198,7 @@ def all_valid_moves(piece, start_pos, board):
                     if target < 0 :
                         moves.append((nx, ny))
 
-            return moves
+            return np.array(moves)
 
 ## Legal move generation
 ## board will get all the fen string 
@@ -226,27 +226,39 @@ def legal_move_generation(board, fen_string):
 
     if is_white and 6 in board[7]:
         if can_castle_kingside(board, fen_string, is_white):
-            legal_moves.append("white can castle king side")
+            legal_moves.append(("white can castle king side"))
         if can_castle_queenside(board, fen_string, is_white):
-            legal_moves.append("white can castle queen side")   
+            legal_moves.append(("white can castle queen side"))   
     if not is_white and 6 in board[0]:
         if can_castle_kingside(board, fen_string, is_white):
-            legal_moves.append("black can castle king side")
+            legal_moves.append(("black can castle king side"))
         if can_castle_queenside(board, fen_string, is_white):
-            legal_moves.append("black can castle queen side")
+            legal_moves.append(("black can castle queen side"))
 
     enp_moves = is_enpassant(board, fen_string, is_white)
     for x, y, enp_rows, enp_cols in enp_moves:
         legal_moves.append(((x, y), (enp_rows), (enp_cols), 'en_passant'))
 
-    return legal_moves
+    return np.array(legal_moves)
 
 fen = "rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 3"
 board = fen_string_board(fen)
 board = to_numericalboard(board, encoded)
-print(legal_move_generation(board, fen))
+legal_move = legal_move_generation(board, fen)
+# print(legal_move)
+def encode_back_fen_legal_move(board, legal_move):
 
+    row_encode = {0:'8', 1:'7', 2:'6', 3:'5', 4:'4', 5:'3', 6:'2', 7:'1'}
+    col_encode = {0:'a', 1:'b', 2:'c', 3:'d', 4:'e', 5:'f', 6:'g', 7:'h'}
 
+    encoded_legal_moves = []
+    for moves in legal_move:
+        encode = "".join(col_encode[moves[1]]+row_encode[moves[0]])
+        encoded_legal_moves.append(encode)
+
+    return encoded_legal_moves
+        
+# print(encode_back_fen_legal_move(board, legal_move))
 # print(list(encoded.keys())[list(encoded.values()).index(board[7][0])])
 
 
