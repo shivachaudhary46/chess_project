@@ -272,7 +272,7 @@ board = fen_string_board(fen)
 board = to_numericalboard(board, encoded)
 # print(board)
 # print(find_king(board, False))
-print(board)
+# print(board)
 def find_king(board, is_white):
     
     for x in range(0, 8):
@@ -323,58 +323,6 @@ def is_check(board, is_white):
         # move = make_move()
         # if not is_check(new_board, is_white):
         #     return False
-
-def square_to_index(square):
-    files = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7}
-    ranks = {'8': 0, '7': 1, '6': 2, '5': 3, '4': 4, '3': 5, '2': 6, '1': 7}
-
-    file = square[0]
-    rank = square[1]
-
-    return ranks[rank], files[file]
-
-def parse_index(string):
-
-    from_square = string[:2]
-    to_square = string[2:]
-
-    from_pos = square_to_index(from_square)
-    to_pos = square_to_index(to_square)
-
-    return from_pos, to_pos
-
-string_index = parse_index("e4e5")
-# print(string_index)
-
-def global_input():
-
-    fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-
-    is_white = get_turn(fen) == "w"
-
-    while True:
-
-        ## printing the board 
-        board = fen_string_board(fen)
-        to_view_fen_converted(board)
-        board=to_numericalboard(board, encoded)
-
-        player = "white" if is_white else "black"
-
-        take_input = input(f"{player} ! please insert a move like (e2e4, b1c3): ")
-
-        try:
-            from_pos, to_pos = parse_index(take_input)
-        except Exception as e:
-            print("Invalid input format!!")
-
-        ## generate legal_moves 
-        legal_moves = legal_move_generation(board, fen, is_white)
-        print(legal_moves)
-        ## check player move is legal 
-
-
-global_input()
 
 
 turn = get_turn(fen)

@@ -16,7 +16,7 @@ encoded = {"R": 2 , "N": 3, "B": 4, "Q": 5, "K": 6, "P": 1, "r": -2, "n": -3, "b
 fen_string = "8/8/8/8/8/8/7q/7K w - - 0 1"
 
 ## convert fen string to board ["R", "N"] like that 
-def fen_string_board(fen_string):
+def fen_string_board(fen_string):  
     """will return exactly board pieces in a array"""
     rows = fen_string.split(" ")[0].split("/")
     board = []
