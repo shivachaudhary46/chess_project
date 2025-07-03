@@ -9,19 +9,31 @@ def main():
     print("******** Chess Game ********")
     print()
     print("created by 'shivah chaudhary'")
-    print("enter a chess moves like (e2e4, b1c3, e7e8) \nenter (q, exit) for exit: ")
+    print("enter a chess moves like (e2e4, b1c3, e7e8) \nenter (q, exit) for exit \nenter (z, undo) for undo: ")
     while True:
 
         '''show which turn (black, white)'''
         print(f"Turn: {'White' if gs.isWhiteTurn else 'Black'}")
         print()
 
+        '''print board , without this so confusing '''
+        gs.printBoardState()
+        print()
+
         take_input = input("enter a valid chess move: ").lower()
         print()
 
         '''we have board like wR, wB, wN but do we need to convert into the numerical array??'''
-        validMoves=gs.getAllValidMoves()
-        
+        validMoves=gs.getValidKingChecks()
+
+        if len(validMoves) == 0:
+            if not gs.isWhiteTurn :
+                print("White won Game!!! \ncongratulation!!!")
+                break
+            else:
+                print("Black won Game!!! \ncongratulation!!!")
+                break
+
         if take_input == 'q' or take_input == 'exit':
             break
         
@@ -45,6 +57,11 @@ def main():
                 
                 '''print board condition'''
                 gs.printBoardState()
+
+            '''undoing a move'''
+            if take_input == 'z' or take_input == 'undo':
+                gs.undoMove()
+                gs.printBoardState()
         
         except KeyError:
             print("Invalid square input. use coordinates like e2e4")
@@ -52,12 +69,6 @@ def main():
         except Exception as e:
             print(f"Error: {e}")
                 
-        '''undoing a move'''
-        if take_input == 'Z':
-            gs.undoMove()
-            gs.printBoardState()
-
-
 if __name__ == "__main__":
     main()
             

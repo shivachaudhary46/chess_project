@@ -25,13 +25,23 @@ class gamestate:
             }
         self.isWhiteTurn = True
         self.moveLog = []
+        self.whiteKingPos = (7, 4)
+        self.blackKingPos = (0, 4)
+        self.checkMate = False  # one player does not have legal move for kings. 
+        self.stalemate = False # both player does not have legal moves
+        self.kingMoved = False
+        self.rookMoved = False
 
     def makeMove(self, move):
         self.board[move.startRow][move.startCol] = '--'
         self.board[move.endRow][move.endCol] = move.pieceSource
         self.moveLog.append(move) #log the move 
         self.isWhiteTurn = not self.isWhiteTurn
-        
+        if move.pieceSource == 'wK':
+            self.whiteKingPos = (move.endRow, move.endCol)
+        if move.pieceSource == 'bK':
+            self.blackKingPos = (move.endRow, move.endCol)
+         
     '''print a board state'''
     def printBoardState(self):
         print("   a  b  c  d  e  f  g  h")
@@ -49,6 +59,61 @@ class gamestate:
             self.board[move.startRow][move.startCol] = move.pieceSource
             self.board[move.endRow][move.endCol] = move.pieceDest
             self.isWhiteTurn = not self.isWhiteTurn
+            if move.pieceSource == 'wK':
+                self.whiteKingPos = (move.startRow, move.startCol)
+            if move.pieceSource == 'bK':
+                self.blackKingPos = (move.startRow, move.startCol)
+            
+    ''''''
+    def getValidKingChecks(self):
+        # generate all possible moves 
+        moves = self.getAllValidMoves()
+        # for each move, make the move
+        for i in range(len(moves)-1, -1, -1):
+            self.makeMove(moves[i])
+            
+            # going for opponent moves
+            self.isWhiteTurn = not self.isWhiteTurn
+            if self.inCheck():  # if they do attack the king then it is not valid move
+                moves.remove(moves[i])
+
+            self.isWhiteTurn = not self.isWhiteTurn
+            self.undoMove()
+        
+        if self.inCheck():
+            print(f"{"white" if self.isWhiteTurn else "Black"} king is in check condition")
+
+        '''end the game check mate condition'''
+        if len(moves) == 0:
+            if self.inCheck():
+                self.checkMate = True
+
+            else:
+                self.checkMate = False
+                self.staleMate = False       
+
+        # generate all opponents move
+        # for each of your opponent's moves, see if they attack your king 
+        # if they do attack king then remove that move
+        return moves
+    
+    '''determine if the king is under attacked or not ?'''
+    def inCheck(self):
+        if self.isWhiteTurn:
+            return self.squareUnderAttack(self.whiteKingPos[0], self.whiteKingPos[1])
+        else: 
+            return self.squareUnderAttack(self.blackKingPos[0], self.blackKingPos[1])
+
+    '''checks for if opponent moves is attacking a king pos??'''
+    def squareUnderAttack(self, r, c):
+        self.isWhiteTurn = not self.isWhiteTurn ## first switch for opponent moves
+        oppo_moves = self.getAllValidMoves()
+        self.isWhiteTurn = not self.isWhiteTurn ## bring back
+        for move in oppo_moves:
+            if move.endRow == r and move.endCol == c:
+                return True
+        return False
+
 
     '''generate all possible moves for each piece'''
     def getAllValidMoves(self):
@@ -208,6 +273,52 @@ class gamestate:
                 else:
                     break
 
+    '''King side castaling of both white and black kings'''
+    def canKingSideCastle(self, r, c, moves):
+        if self.isWhiteTurn:
+            # for white turn
+            king_row, king_col = (7, 4)
+            rook_row = 7
+            castle_to_king_to = (7, 6)
+            castle_rook_to = (7, 5)
+            king_moved = self.kingMoved # True means king has moved
+            rook_moved = self.rookMoved # again True means king has moved
+        else:
+            # for black turn 
+            king_row, king_col = (0, 4)
+            rook_row = 0
+            castle_king_to = (0,6)
+            castle_rook_to = (0,5)
+            king_moved = self.kingMoved
+            rook_moved = self.rookMoved
+
+        # check 
+        if not king_moved and not rook_moved :
+            if (self.board[king_row][])
+
+    '''king can castle'''
+    def isKingCanCastle(self):
+        # get a rook move 
+        rook_valid_moves = self.getAllValidMoves()
+        iterate_valid = []
+        for each in rook_valid_moves:
+            iterate_valid.append(((each.startRow, each.startCol), (each.endRow, each.endCol)))
+
+        # check whose turn is now
+        if self.isWhiteTurn: #white turn 
+
+            if (7, 7) in rook_valid_moves and self.whitekingPos == (7, 4):
+                return True
+            
+            return False
+            
+        else:
+            if (0, 7) in rook_valid_moves and self.whiteKingPos == (0, 4):
+                return True 
+            
+            return False 
+
+    '''Queen side castaling of both white and black kings'''
     def isPlayerValidMove(self, move, validMoves):
         iterate_valid = []
         for each in validMoves:
@@ -218,6 +329,7 @@ class gamestate:
         dest = move.endRow, move.endCol
         piece = (source, dest)
         return piece in iterate_valid
+    
 
 class numericalBoard(gamestate):
 
@@ -274,7 +386,6 @@ class Move:
         if isinstance(other, Move):
             return self.moveId == other.moveId
         return False
-
 
 '''
     it will have the startSource and destination converted as row and columns
