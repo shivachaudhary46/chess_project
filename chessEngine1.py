@@ -30,9 +30,7 @@ class gamestate:
         self.checkMate = False  # one player does not have legal move for kings. 
         self.stalemate = False # both player does not have legal moves
         self.currentCastalingRights = castalingRights(True, True, True, True)   # current castaling rights we can castle 
-        self.castlingRightLogs = []
-        self.castlingRightLogs.append(castalingRights(True, True, True, True))
-
+        self.castlingRightLogs = [castalingRights(True, True, True, True)]
     '''make move in the board'''
     def makeMove(self, move):
         self.board[move.startRow][move.startCol] = '--'
@@ -44,6 +42,25 @@ class gamestate:
             self.whiteKingPos = (move.endRow, move.endCol)
         if move.pieceSource == 'bK':    # what if black king has moved 
             self.blackKingPos = (move.endRow, move.endCol)
+
+        '''castle the king and queen side of move'''
+        if move.isCastle:   
+            if move.endCol - move.startCol == 2:    # king side 
+                self.board[move.endRow][move.endCol-1] = self.board[move.endRow][move.endCol+1] # rook move 
+                self.board[move.endRow][move.endCol+1] = '--'  # after moving rook make that cell empty 
+            else:   # queen side move
+                self.board[move.endRow][move.endCol+1] = self.board[move.endRow][move.endCol-2]
+                self.board[move.endRow][move.endCol-2] = '--'
+
+        # castling right moves
+        self.updateCastleRights(move)
+        # Fix the typo: "currrent" -> "current"
+        self.castlingRightLogs.append(castalingRights(
+            self.currentCastalingRights.B_K_side, 
+            self.currentCastalingRights.B_Q_side, 
+            self.currentCastalingRights.W_K_side, 
+            self.currentCastalingRights.W_Q_side  
+        ))
 
     '''update the castaling rights if the white or black king has moved or rook has moved'''
     def updateCastleRights(self, move):
@@ -65,8 +82,6 @@ class gamestate:
             if move.startCol == 7 : # right black has moved 
                 self.currentCastalingRights.B_K_side = False
     
-    '''upda'''
-
 
     '''print a board state'''
     def printBoardState(self):
@@ -85,20 +100,37 @@ class gamestate:
             self.board[move.startRow][move.startCol] = move.pieceSource
             self.board[move.endRow][move.endCol] = move.pieceDest
             self.isWhiteTurn = not self.isWhiteTurn
+
+            # undo the black king and queen move
             if move.pieceSource == 'wK':
                 self.whiteKingPos = (move.startRow, move.startCol)
             if move.pieceSource == 'bK':
                 self.blackKingPos = (move.startRow, move.startCol)
 
+            # undo castling moves 
+            if move.isCastle:   
+                if move.endCol - move.startCol == 2:    # king side 
+                    self.board[move.endRow][move.endCol+1] = self.board[move.endRow][move.endCol-1] # rook move 
+                    self.board[move.endRow][move.endCol-1] = '--'  # after moving rook make that cell empty 
+                else:   # queen side move
+                    self.board[move.endRow][move.endCol-2] = self.board[move.endRow][move.endCol+1]
+                    self.board[move.endRow][move.endCol+1] = '--'
 
-           
+            # undo castaling rights 
+            if self.castlingRightLogs:  # If there are still entries in the log
+                # Update current castling rights to the last state
+                lastRights = self.castlingRightLogs[-1]
+                self.currentCastalingRights = castalingRights(
+                    lastRights.B_K_side,
+                    lastRights.B_Q_side,
+                    lastRights.W_K_side,
+                    lastRights.W_Q_side
+                )
 
-        
-
-    ''''''
+    '''this function returns all valid moves'''
     def getValidKingChecks(self):
         # generate all possible moves 
-        moves = self.getAllValidMoves()
+        moves = self.getAllValidMoves(forAttack=True)
         # for each move, make the move
         for i in range(len(moves)-1, -1, -1):
             self.makeMove(moves[i])
@@ -111,6 +143,7 @@ class gamestate:
             self.isWhiteTurn = not self.isWhiteTurn
             self.undoMove()
         
+        # if king is in check condition then print 
         if self.inCheck():
             print(f"{"white" if self.isWhiteTurn else "Black"} king is in check condition")
 
@@ -138,17 +171,26 @@ class gamestate:
     '''checks for if opponent moves is attacking a king pos??'''
     def squareUnderAttack(self, r, c):
         self.isWhiteTurn = not self.isWhiteTurn ## first switch for opponent moves
-        oppo_moves = self.getAllValidMoves()
+        oppo_moves = self.getAllValidMoves(forAttack=True)
         self.isWhiteTurn = not self.isWhiteTurn ## bring back
         for move in oppo_moves:
             if move.endRow == r and move.endCol == c:
                 return True
         return False
 
-
     '''generate all possible moves for each piece'''
-    def getAllValidMoves(self):
+    def getAllValidMoves(self, forAttack=False):
         moves=[]
+
+        # get temp castaling rights
+
+        # self is white turn 
+        if not forAttack:
+            if self.isWhiteTurn:
+                self.getCastlingMoves(self.whiteKingPos[0], self.whiteKingPos[1], moves)
+            else:
+                self.getCastlingMoves(self.blackKingPos[0], self.blackKingPos[1], moves)
+
         for r in range(len(self.board)):
             for c in range(len(self.board[r])):
                 turn=self.board[r][c][0]
@@ -281,6 +323,27 @@ class gamestate:
                     self.kingMoved = True
                     moves.append(Move((r, c), (nx, ny), self.board))
 
+    '''get all king side moves'''
+    def getCastlingMoves(self, r, c, moves):
+        if not self.squareUnderAttack(r, c):
+            if (self.isWhiteTurn and self.currentCastalingRights.W_K_side) or (not self.isWhiteTurn and self.currentCastalingRights.B_K_side):
+                self.getKingCastleMoves(r, c, moves)
+
+            if (self.isWhiteTurn and self.currentCastalingRights.W_Q_side) or (not self.isWhiteTurn and self.currentCastalingRights.B_Q_side):
+                self.getQueenCastleMoves(r, c, moves)
+
+    '''get all castling king side moves'''
+    def getKingCastleMoves(self, r, c, moves):
+        if self.board[r][c+1] == '--' and self.board[r][c+2] == '--':
+            if (not self.squareUnderAttack(r, c+1) and not self.squareUnderAttack(r, c+2)):
+                moves.append(Move((r, c), (r, c+2), self.board, isCastle=True))
+
+    '''get all castling Queen side moves'''
+    def getQueenCastleMoves(self, r, c, moves):
+        if self.board[r][c-1] == '--' and self.board[r][c-2] == '--':
+            if (not self.squareUnderAttack(r, c-1) and not self.squareUnderAttack(r, c-2)):
+                moves.append(Move((r, c), (r, c-2), self.board, isCastle=True))
+ 
     '''get all bishop moves at a specific row and col'''
     def getBishopMoves(self, r, c, moves):
         for direction in self.directions['B']:
@@ -366,7 +429,7 @@ class Move:
         it will have the startSource and destination converted as row and columns
         maps key and values as rank to rows 
     '''
-    def __init__(self, startSq, endSq, board):
+    def __init__(self, startSq, endSq, board, isCastle=False):
         ''' basically it will divide start source and ending destination (row, col) as seperate row and col'''
         self.startRow = startSq[0]
         self.startCol = startSq[1]
@@ -375,6 +438,7 @@ class Move:
         self.pieceSource = board[self.startRow][self.startCol]
         self.pieceDest = board[self.endRow][self.endCol]
         self.moveId = self.startRow * 1000 + self.startCol * 100 + self.endRow * 10 + self.endCol
+        self.isCastle = isCastle
     '''
     prints like source to destination of pieces 
     '''
