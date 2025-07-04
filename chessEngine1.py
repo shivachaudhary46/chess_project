@@ -25,23 +25,49 @@ class gamestate:
             }
         self.isWhiteTurn = True
         self.moveLog = []
-        self.whiteKingPos = (7, 4)
-        self.blackKingPos = (0, 4)
+        self.whiteKingPos = (7, 4) # white king actual position
+        self.blackKingPos = (0, 4) # black king actual position 
         self.checkMate = False  # one player does not have legal move for kings. 
         self.stalemate = False # both player does not have legal moves
-        self.kingMoved = False
-        self.rookMoved = False
+        self.currentCastalingRights = castalingRights(True, True, True, True)   # current castaling rights we can castle 
+        self.castlingRightLogs = []
+        self.castlingRightLogs.append(castalingRights(True, True, True, True))
 
+    '''make move in the board'''
     def makeMove(self, move):
         self.board[move.startRow][move.startCol] = '--'
         self.board[move.endRow][move.endCol] = move.pieceSource
         self.moveLog.append(move) #log the move 
         self.isWhiteTurn = not self.isWhiteTurn
-        if move.pieceSource == 'wK':
+
+        if move.pieceSource == 'wK':    # what if white king has moved 
             self.whiteKingPos = (move.endRow, move.endCol)
-        if move.pieceSource == 'bK':
+        if move.pieceSource == 'bK':    # what if black king has moved 
             self.blackKingPos = (move.endRow, move.endCol)
-         
+
+    '''update the castaling rights if the white or black king has moved or rook has moved'''
+    def updateCastleRights(self, move):
+        if move.pieceSource == 'wK':
+            self.currentCastalingRights.W_K_side = False
+            self.currentCastalingRights.W_Q_side = False 
+        elif move.pieceSource == 'bK':
+            self.currentCastalingRights.B_K_side = False 
+            self.currentCastalingRights.B_Q_side = False 
+        elif move.pieceSource == 'wR':
+            if move.startRow == 7:
+                if move.startCol == 0 : # left white rook has moved
+                    self.currentCastalingRights.W_Q_side = False
+                if move.startCol ==  7: # right white rook has moved
+                    self.currentCastalingRights.W_K_side = False
+        elif move.pieceSource == 'bR':
+            if move.startRow == 0 : # left black rook has moved
+                self.currentCastalingRights.B_Q_side = False
+            if move.startCol == 7 : # right black has moved 
+                self.currentCastalingRights.B_K_side = False
+    
+    '''upda'''
+
+
     '''print a board state'''
     def printBoardState(self):
         print("   a  b  c  d  e  f  g  h")
@@ -63,7 +89,12 @@ class gamestate:
                 self.whiteKingPos = (move.startRow, move.startCol)
             if move.pieceSource == 'bK':
                 self.blackKingPos = (move.startRow, move.startCol)
-            
+
+
+           
+
+        
+
     ''''''
     def getValidKingChecks(self):
         # generate all possible moves 
@@ -199,10 +230,12 @@ class gamestate:
 
                     # if destination is empty 
                     if target == '--':
+                        self.rookMoved = True
                         moves.append(Move((r, c), (nx, ny), self.board))
 
                     # capturing piece
                     elif ((target[0] == 'b' and self.isWhiteTurn) or (target[0] == 'w' and not self.isWhiteTurn)):
+                        self.rookMoved = True
                         moves.append(Move((r, c), (nx, ny), self.board))
                         break
                     
@@ -245,6 +278,7 @@ class gamestate:
             if 0<=nx<=7 and 0<=ny<=7:
                 target=self.board[nx][ny]
                 if target == '--' or (target[0] == 'b' and self.isWhiteTurn) or (target[0] == 'w' and not self.isWhiteTurn):
+                    self.kingMoved = True
                     moves.append(Move((r, c), (nx, ny), self.board))
 
     '''get all bishop moves at a specific row and col'''
@@ -272,52 +306,7 @@ class gamestate:
                         break
                 else:
                     break
-
-    '''King side castaling of both white and black kings'''
-    def canKingSideCastle(self, r, c, moves):
-        if self.isWhiteTurn:
-            # for white turn
-            king_row, king_col = (7, 4)
-            rook_row = 7
-            castle_to_king_to = (7, 6)
-            castle_rook_to = (7, 5)
-            king_moved = self.kingMoved # True means king has moved
-            rook_moved = self.rookMoved # again True means king has moved
-        else:
-            # for black turn 
-            king_row, king_col = (0, 4)
-            rook_row = 0
-            castle_king_to = (0,6)
-            castle_rook_to = (0,5)
-            king_moved = self.kingMoved
-            rook_moved = self.rookMoved
-
-        # check 
-        if not king_moved and not rook_moved :
-            if (self.board[king_row][])
-
-    '''king can castle'''
-    def isKingCanCastle(self):
-        # get a rook move 
-        rook_valid_moves = self.getAllValidMoves()
-        iterate_valid = []
-        for each in rook_valid_moves:
-            iterate_valid.append(((each.startRow, each.startCol), (each.endRow, each.endCol)))
-
-        # check whose turn is now
-        if self.isWhiteTurn: #white turn 
-
-            if (7, 7) in rook_valid_moves and self.whitekingPos == (7, 4):
-                return True
             
-            return False
-            
-        else:
-            if (0, 7) in rook_valid_moves and self.whiteKingPos == (0, 4):
-                return True 
-            
-            return False 
-
     '''Queen side castaling of both white and black kings'''
     def isPlayerValidMove(self, move, validMoves):
         iterate_valid = []
@@ -329,8 +318,18 @@ class gamestate:
         dest = move.endRow, move.endCol
         piece = (source, dest)
         return piece in iterate_valid
-    
+        
+class castalingRights:
+    '''
+    castaling flag for the Black king side, black queen side, white king side, white queen side
+    '''
+    def __init__(self, B_K_side, B_Q_side, W_K_side, W_Q_side):
+        self.B_K_side = B_K_side
+        self.B_Q_side = B_Q_side
+        self.W_K_side = W_K_side
+        self.W_Q_side = W_Q_side
 
+    
 class numericalBoard(gamestate):
 
     ''' text format is encoded 
