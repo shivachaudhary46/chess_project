@@ -20,11 +20,11 @@ def main():
         gs.printBoardState()
         print()
 
-        take_input = input("enter a valid chess move: ").lower()
-        print()
-
         '''we have board like wR, wB, wN but do we need to convert into the numerical array??'''
         validMoves=gs.getValidKingChecks()
+
+        take_input = input("enter a valid chess move: ").lower()
+        print()
 
         if len(validMoves) == 0:
             if not gs.isWhiteTurn :
