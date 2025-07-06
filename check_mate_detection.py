@@ -36,138 +36,6 @@ def to_view_fen_converted(board):
     for row in board:
         print(" ".join(row))
 
-def to_numericalboard(board, encoding):
-    """Converting fen style board view to numerical_board representation"""
-    moves = []
-    for row in board:
-        each_rows = []
-        for c in row:
-            each_rows.append(encoding.get(c, 0))
-        moves.append(each_rows)
-    
-    return moves
-
-
-def all_valid_moves(piece, start_pos, board):
-    x, y = start_pos
-    name = piece.upper()
-    piece_code = encoded[piece]
-    iswhite = piece_code < 0
-    moves = []
-    
-    if name in ["R", "B", "Q"]:
-        for direction in directions[name]:
-            for step in range(1, 8):
-                nx, ny = x+step*direction[0], y+step*direction[1]
-                
-                ## the moving piece destination should be limit inside the 
-                ## 8 * 8 array
-                if 0<=nx<=7 and 0<=ny<=7:
-                    target = board[nx][ny]
-
-                    # if destination is empty 
-                    if target == 0:
-                        moves.append(((x, y), (nx, ny)))
-
-                    # capturing piece
-                    elif ((target < 0 and not iswhite) or (target > 0 and iswhite)):
-                        moves.append(((x, y), (nx, ny)))
-                        break
-                    
-                    ## target is same as one 
-                    else:
-                        break
-                else:
-                    break
-        return moves
-
-    elif name in ["N", "K"]:
-        for dx, dy in directions[name]:
-            nx, ny= x+dx , y+dy
-            if 0<=nx<=7 and 0<=ny<=7:
-                target = board[nx][ny]
-                if target == 0 or ((target < 0 and not iswhite) or (target > 0 and iswhite)):
-                    moves.append(((x, y), (nx, ny)))
-        return moves
-
-    elif name == "P":
-        if iswhite: ## black
-            ## move one direction each 
-            if x < 7 and board[x+1][y] == 0 :
-                moves.append(((x, y), (x+1, y)))
-            
-            ## move two squares if row position is 1
-            if x == 1 and board[x+2][y]:
-                moves.append(((x, y), (x+2, y)))
-
-            ## capture piece diagnoally
-            for diag in [-1, 1]:
-                nx, ny = x + 1, y + diag
-                if 0<=nx<=7 and 0<=ny<=7: 
-                    target = board[nx][ny]
-                    if target > 0 :
-                        moves.append(((x, y),(nx, ny)))
-            
-            return moves
-
-        else:
-            # for white pawn 
-            if x > 0 and board[x-1][y] == 0 :
-                moves.append(((x, y),(x-1, y)))
-            
-            ## move two squares if row position is 1
-            if x == 6 and board[x-2][y]:
-                moves.append(((x, y), (x-2, y)))
-
-            ## capture piece diagnoally
-            for diag in [-1, 1]:
-                nx, ny = x + 1, y + diag
-                if 0<=nx<=7 and 0<=ny<=7: 
-                    target = board[nx][ny]
-                    if target < 0 :
-                        moves.append(((x, y),(nx, ny)))
-
-            return moves
-        
-
-def can_castle_kingside(board,  fen_string, is_white):
-    """Return False and true when king (white or black) piece cannot castle / can castle"""
- 
-    castling_rights = fen_string.split(" ")[2]
-
-    ## before castling important thing is that the current fen style must
-    ## have K or k should be inlcluded. 
-    if  is_white and "K" not in castling_rights:
-        return False
-    if not is_white and "k" not in castling_rights:
-        return False
-    
-    ## this statement makes clear which row to go for 
-    ## when white piece has turn and viceversa 
-    row = 7 if is_white else 0 
-
-    ## the two squares (7, 5), (7, 6) must be empty to castle
-    if board[row][5] != 0  and board[row][6] != 0:
-        return False
-    return True
-
-def can_castle_queenside(board, fen_string, is_white):
-    """Return False and true when Queen (white or black) piece cannot castle / can castle"""
-    castling_rights = fen_string.split(" ")[2]
-
-    if is_white and "Q" not in castling_rights:
-        return False
-    if not is_white and "q" not in castling_rights:
-        return False
-    
-    ## this statement makes clear which row to go for 
-    ## when white piece has turn and viceversa 
-    row = 7 if is_white else 0
-
-    if board[row][1] != 0 or board[row][2] != 0 or board[row][3] != 0:
-        return False
-    return True 
-
 ## En passant 
 def is_enpassant(board, fen_string, is_white):
     en_passant = fen_string.split(" ")[3]
@@ -197,63 +65,13 @@ def is_enpassant(board, fen_string, is_white):
 
 ## Legal move generation
 ## board will get all the fen string 
-def legal_move_generation(board, fen_string, is_white):
-    legal_moves = []
-    
-    for x in range(8):
-        for y in range(8):
 
-            piece_code = board[x][y]
-
-            # skip empty squares 
-            if piece_code == 0:
-                continue
-
-            ## skip opponent pieces 
-            if (is_white and piece_code < 0) or (not is_white and piece_code > 0):
-                continue
-
-            piece_letter = list(encoded.keys())[list(encoded.values()).index(piece_code)]
-            moves = all_valid_moves(piece_letter, (x, y), board)
-            for move in moves :
-                legal_moves.append(move)
-
-    # For white king on row 7
-    if is_white and 6 in board[7]:
-        king_start = (7, 4)
-
-        if can_castle_kingside(board, fen_string, is_white):
-            king_end = (7, 6)  # King goes from e1 to g1
-            legal_moves.append((king_start, king_end))
-
-        if can_castle_queenside(board, fen_string, is_white):
-            king_end = (7, 2)  # King goes from e1 to c1
-            legal_moves.append((king_start, king_end))
-
-    # For black king on row 0
-    if not is_white and 6 in board[0]:
-        king_start = (0, 4)
-
-        if can_castle_kingside(board, fen_string, is_white):
-            king_end = (0, 6)  # e8 to g8
-            legal_moves.append((king_start, king_end))
-
-        if can_castle_queenside(board, fen_string, is_white):
-            king_end = (0, 2)  # e8 to c8
-            legal_moves.append((king_start, king_end))
-
-    enp_moves = is_enpassant(board, fen_string, is_white)
-    for x, y, enp_rows, enp_cols in enp_moves:
-        legal_moves.append(((x, y), (enp_rows, enp_cols)))
-
-    return legal_moves
 
 fen = "rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 3"
 board = fen_string_board(fen)
 board = to_numericalboard(board, encoded)
 turn = get_turn(fen)
 is_white = turn == "w"
-legal_move = legal_move_generation(board, fen, is_white)
 # print(legal_move)
 def encode_back_fen_legal_move(board, legal_move):
 
@@ -270,86 +88,9 @@ def encode_back_fen_legal_move(board, legal_move):
 fen = "6k1/8/8/8/8/8/6Q1/7K w - - 0 1"
 board = fen_string_board(fen)
 board = to_numericalboard(board, encoded)
-# print(board)
-# print(find_king(board, False))
-# print(board)
-def find_king(board, is_white):
-    
-    for x in range(0, 8):
-        for y in range(0, 8):
-            if is_white and board[x][y] == 6:
-                return (x, y)
-
-            if not is_white and board[x][y] == -6:
-                return (x, y)
-
-def is_check(board, is_white):
-
-    king_position = find_king(board, is_white)
-
-    opponent_color = not is_white
-
-    opponent_moves = legal_move_generation(board, fen, opponent_color)
-    ## king has not moved 
-
-    for each in opponent_moves:
-        if king_position in each:
-            return True
-        
-    return False
-
-# def make_move(board, move):
-#     new_board = np.copy(board)
-#     from_x, from_y =. 
-    
-## now going for the chess check_mate conditions 
-# def is_check_mate(board, is_white):
-
-#     ## if board has no check condition then there will never checkmate conditions either
-#     if not is_check(board, is_white):
-#         return False
-    
-#     ## if the oponent is giving check then king can escape check?? 
-
-#     own_moves = legal_move_generation(board, fen, is_white)
-#     for move in own_moves:
-        
-#         from_x, from_y = move[0]
-#         to_x, to_y = move[1]
-
-#         print(from_x, from_y, to_x,  to_y)
-        # new_board = np.copy(board)
-        
-        # move = make_move()
-        # if not is_check(new_board, is_white):
-        #     return False
-
 
 turn = get_turn(fen)
 is_white = turn == "w"
-# print(is_check(board, is_white))
-# print(is_check_mate(board, is_white))
-# is_check_mate(board, is_white)
-
-
-    ## if black king exist in the any type of routes 
-        # moves by white piece
-        # then that scenario is check 
-
-        ## and same scenario for the white king as. well 
-
-        ## what is checkmate condition :
-        ## check mate is a condition where king cannot move in any
-        ## of the direction if it is attacked.
 
 fen = "6k1/8/8/8/8/8/6Q1/7K w - - 0 1"
 
-
-turn = get_turn(fen)
-is_white = turn == "w"
-board = fen_string_board(fen)
-board = to_numericalboard(board, encoded)
-# print(board)
-
-check = is_check(board, is_white)
-# print(check)
