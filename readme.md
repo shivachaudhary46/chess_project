@@ -145,5 +145,11 @@ Hello learner fellows! Back again for another update. ***Date: [2082-03-13]*** *
 - Broke the problem into smaller functions—handling and debugged each thing, legal move generation,
 - still not able to find solution to stimulate the checkmate condition 
 
+## DAY 7 - 11
+Hello learner fellows! Back again for another update. 
 
-
+### Today's Goals
+- [x] Start implementing checkmate detection
+- [x] Begin handling special chess rules: Castling and En passant
+- [x] Visualize the board and verify move legality
+- [x] Completed CLI chess 
